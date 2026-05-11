@@ -1,0 +1,16 @@
+logging:
+  level:
+    com.zaxxer.hikari.HikariConfig: DEBUG
+
+security:
+  key:
+    private: classpath:app.key
+    public: classpath:app.pub
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+
+  jpa:
+    open-in-view: false
