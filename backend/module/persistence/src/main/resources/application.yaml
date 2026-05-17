@@ -4,8 +4,10 @@ spring:
 
   jpa:
     open-in-view: false
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: create-drop
+
 
 decorator:
   datasource:

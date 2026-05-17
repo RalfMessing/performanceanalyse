@@ -53,6 +53,14 @@ class ArticleRepositoryAdapter implements ArticleRepository {
     }
 
     @Override
+    public long countAll(ArticleFacets facets) {
+        var spec = Specification.where(ArticleSpecifications.hasAuthorName(facets.author()))
+                .or(ArticleSpecifications.hasTagName(facets.tag()))
+                .or(ArticleSpecifications.hasFavoritedUsername(facets.favorited()));
+        return articleJpaRepository.count(spec);
+    }
+
+    @Override
     public Optional<Article> findBySlug(String slug) {
         return articleJpaRepository.findBySlug(slug);
     }

@@ -59,14 +59,15 @@ class ArticleController implements AuthenticationAwareMixin {
             @RequestParam(value = "favorited", required = false) String favorited,
             @RequestParam(value = "offset", required = false, defaultValue = "0") int offset,
             @RequestParam(value = "limit", required = false, defaultValue = "20") int limit) {
-        var facets = new ArticleFacets(tag, author, favorited, offset, limit);
+        var facets = new ArticleFacets(tag, author, favorited, offset / limit, limit);
+        long totalCount = articleService.countArticles(facets);
 
         if (this.isAnonymousUser(readersToken)) {
-            return getArticlesResponse(articleService.getArticles(facets));
+            return getArticlesResponse(articleService.getArticles(facets), totalCount);
         }
 
         var reader = userService.getUser(readersToken.userId());
-        return this.getArticlesResponse(articleService.getArticles(reader, facets));
+        return getArticlesResponse(articleService.getArticles(reader, facets), totalCount);
     }
 
     @GetMapping("/api/articles/{slug}")
@@ -119,15 +120,15 @@ class ArticleController implements AuthenticationAwareMixin {
             @RequestParam(value = "offset", required = false, defaultValue = "0") int offset,
             @RequestParam(value = "limit", required = false, defaultValue = "20") int limit) {
         var reader = userService.getUser(readersToken.userId());
-        var facets = new ArticleFacets(offset, limit);
+        var facets = new ArticleFacets(offset / limit, limit);
         var articleDetails = articleService.getFeeds(reader, facets);
 
-        return this.getArticlesResponse(articleDetails);
+        return this.getArticlesResponse(articleDetails, articleDetails.size());
     }
 
-    private MultipleArticlesResponse getArticlesResponse(List<ArticleDetails> articles) {
+    private MultipleArticlesResponse getArticlesResponse(List<ArticleDetails> articles, long totalCount) {
         return articles.stream()
                 .map(ArticleResponse::new)
-                .collect(collectingAndThen(toList(), MultipleArticlesResponse::new));
+                .collect(collectingAndThen(toList(), list -> new MultipleArticlesResponse(list, (int) totalCount)));
     }
 }

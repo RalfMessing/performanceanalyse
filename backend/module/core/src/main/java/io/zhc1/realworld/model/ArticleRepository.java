@@ -11,6 +11,8 @@ public interface ArticleRepository {
 
     List<Article> findAll(ArticleFacets facets);
 
+    long countAll(ArticleFacets facets);
+
     Optional<Article> findBySlug(String slug);
 
     List<Article> findByAuthors(Collection<User> authors, ArticleFacets facets);

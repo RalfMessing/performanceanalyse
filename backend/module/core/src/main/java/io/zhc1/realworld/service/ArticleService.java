@@ -63,6 +63,10 @@ public class ArticleService {
                 .toList();
     }
 
+    public long countArticles(ArticleFacets facets) {
+        return articleRepository.countAll(facets);
+    }
+
     /**
      * Get articles by my followings.
      *

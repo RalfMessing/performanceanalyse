@@ -1,0 +1,181 @@
+-- ============================================================
+-- Seed Data: Conduit RealWorld Application
+-- 10 users · 20 tags · 500 articles · 1000 article_tags
+-- 200 favorites · 150 comments · 21 follows
+-- Password for all users: "Password1"
+-- ============================================================
+
+-- 1. Users -------------------------------------------------------
+INSERT INTO users (id, email, username, password, bio, image_url, created_at) VALUES
+('00000000-0000-0000-0000-000000000001', 'user1@example.com',  'user1',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 1',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000002', 'user2@example.com',  'user2',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 2',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000003', 'user3@example.com',  'user3',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 3',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000004', 'user4@example.com',  'user4',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 4',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000005', 'user5@example.com',  'user5',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 5',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000006', 'user6@example.com',  'user6',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 6',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000007', 'user7@example.com',  'user7',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 7',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000008', 'user8@example.com',  'user8',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 8',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000009', 'user9@example.com',  'user9',  '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 9',  NULL, CURRENT_TIMESTAMP),
+('00000000-0000-0000-0000-000000000010', 'user10@example.com', 'user10', '$2a$10$15n7ddpoM1v/ZO7rBuPI..DzZbhOUNtksADobSZYaSw1ngA3tO.oC', 'Author bio 10', NULL, CURRENT_TIMESTAMP);
+
+-- 2. Tags --------------------------------------------------------
+INSERT INTO tag (name, created_at) VALUES
+('java',          CURRENT_TIMESTAMP),
+('spring',        CURRENT_TIMESTAMP),
+('angular',       CURRENT_TIMESTAMP),
+('javascript',    CURRENT_TIMESTAMP),
+('typescript',    CURRENT_TIMESTAMP),
+('python',        CURRENT_TIMESTAMP),
+('docker',        CURRENT_TIMESTAMP),
+('kubernetes',    CURRENT_TIMESTAMP),
+('devops',        CURRENT_TIMESTAMP),
+('webdev',        CURRENT_TIMESTAMP),
+('backend',       CURRENT_TIMESTAMP),
+('frontend',      CURRENT_TIMESTAMP),
+('database',      CURRENT_TIMESTAMP),
+('api',           CURRENT_TIMESTAMP),
+('microservices', CURRENT_TIMESTAMP),
+('testing',       CURRENT_TIMESTAMP),
+('security',      CURRENT_TIMESTAMP),
+('performance',   CURRENT_TIMESTAMP),
+('tutorial',      CURRENT_TIMESTAMP),
+('opensource',    CURRENT_TIMESTAMP);
+
+-- 3. Articles (500, spread across 10 authors) --------------------
+INSERT INTO article (created_at, updated_at, author_id, description, slug, title, content)
+SELECT
+    DATEADD(DAY, -X, CURRENT_TIMESTAMP),
+    DATEADD(DAY, -X, CURRENT_TIMESTAMP),
+    CAST(CASE MOD(X - 1, 10)
+        WHEN 0 THEN '00000000-0000-0000-0000-000000000001'
+        WHEN 1 THEN '00000000-0000-0000-0000-000000000002'
+        WHEN 2 THEN '00000000-0000-0000-0000-000000000003'
+        WHEN 3 THEN '00000000-0000-0000-0000-000000000004'
+        WHEN 4 THEN '00000000-0000-0000-0000-000000000005'
+        WHEN 5 THEN '00000000-0000-0000-0000-000000000006'
+        WHEN 6 THEN '00000000-0000-0000-0000-000000000007'
+        WHEN 7 THEN '00000000-0000-0000-0000-000000000008'
+        WHEN 8 THEN '00000000-0000-0000-0000-000000000009'
+        WHEN 9 THEN '00000000-0000-0000-0000-000000000010'
+    END AS UUID),
+    CONCAT('Description ', X),
+    CONCAT('article-slug-', X),
+    CONCAT('Article Title No ', X),
+    CONCAT('Content of article number ', X,
+        '. This is seed data for performance benchmarking of the Conduit RealWorld application.')
+FROM SYSTEM_RANGE(1, 500);
+
+-- 4. Article tags — first tag per article (index = (X-1) % 20) ---
+INSERT INTO article_tag (created_at, article_id, tag_name)
+SELECT CURRENT_TIMESTAMP, X,
+    CASE MOD(X - 1, 20)
+        WHEN  0 THEN 'java'
+        WHEN  1 THEN 'spring'
+        WHEN  2 THEN 'angular'
+        WHEN  3 THEN 'javascript'
+        WHEN  4 THEN 'typescript'
+        WHEN  5 THEN 'python'
+        WHEN  6 THEN 'docker'
+        WHEN  7 THEN 'kubernetes'
+        WHEN  8 THEN 'devops'
+        WHEN  9 THEN 'webdev'
+        WHEN 10 THEN 'backend'
+        WHEN 11 THEN 'frontend'
+        WHEN 12 THEN 'database'
+        WHEN 13 THEN 'api'
+        WHEN 14 THEN 'microservices'
+        WHEN 15 THEN 'testing'
+        WHEN 16 THEN 'security'
+        WHEN 17 THEN 'performance'
+        WHEN 18 THEN 'tutorial'
+        WHEN 19 THEN 'opensource'
+    END
+FROM SYSTEM_RANGE(1, 500);
+
+-- 5. Article tags — second tag per article (offset +7, always different from first)
+INSERT INTO article_tag (created_at, article_id, tag_name)
+SELECT CURRENT_TIMESTAMP, X,
+    CASE MOD(X + 6, 20)
+        WHEN  0 THEN 'java'
+        WHEN  1 THEN 'spring'
+        WHEN  2 THEN 'angular'
+        WHEN  3 THEN 'javascript'
+        WHEN  4 THEN 'typescript'
+        WHEN  5 THEN 'python'
+        WHEN  6 THEN 'docker'
+        WHEN  7 THEN 'kubernetes'
+        WHEN  8 THEN 'devops'
+        WHEN  9 THEN 'webdev'
+        WHEN 10 THEN 'backend'
+        WHEN 11 THEN 'frontend'
+        WHEN 12 THEN 'database'
+        WHEN 13 THEN 'api'
+        WHEN 14 THEN 'microservices'
+        WHEN 15 THEN 'testing'
+        WHEN 16 THEN 'security'
+        WHEN 17 THEN 'performance'
+        WHEN 18 THEN 'tutorial'
+        WHEN 19 THEN 'opensource'
+    END
+FROM SYSTEM_RANGE(1, 500);
+
+-- 6. Article favorites (200: each user favorites a distinct set of articles)
+INSERT INTO article_favorite (created_at, user_id, article_id)
+SELECT CURRENT_TIMESTAMP,
+    CAST(CASE MOD(X - 1, 10)
+        WHEN 0 THEN '00000000-0000-0000-0000-000000000001'
+        WHEN 1 THEN '00000000-0000-0000-0000-000000000002'
+        WHEN 2 THEN '00000000-0000-0000-0000-000000000003'
+        WHEN 3 THEN '00000000-0000-0000-0000-000000000004'
+        WHEN 4 THEN '00000000-0000-0000-0000-000000000005'
+        WHEN 5 THEN '00000000-0000-0000-0000-000000000006'
+        WHEN 6 THEN '00000000-0000-0000-0000-000000000007'
+        WHEN 7 THEN '00000000-0000-0000-0000-000000000008'
+        WHEN 8 THEN '00000000-0000-0000-0000-000000000009'
+        WHEN 9 THEN '00000000-0000-0000-0000-000000000010'
+    END AS UUID),
+    X
+FROM SYSTEM_RANGE(1, 200);
+
+-- 7. Article comments (150 rows, 1 per article 1–150) ------------
+INSERT INTO article_comment (created_at, article_id, author_id, content)
+SELECT CURRENT_TIMESTAMP,
+    X,
+    CAST(CASE MOD(X - 1, 10)
+        WHEN 0 THEN '00000000-0000-0000-0000-000000000001'
+        WHEN 1 THEN '00000000-0000-0000-0000-000000000002'
+        WHEN 2 THEN '00000000-0000-0000-0000-000000000003'
+        WHEN 3 THEN '00000000-0000-0000-0000-000000000004'
+        WHEN 4 THEN '00000000-0000-0000-0000-000000000005'
+        WHEN 5 THEN '00000000-0000-0000-0000-000000000006'
+        WHEN 6 THEN '00000000-0000-0000-0000-000000000007'
+        WHEN 7 THEN '00000000-0000-0000-0000-000000000008'
+        WHEN 8 THEN '00000000-0000-0000-0000-000000000009'
+        WHEN 9 THEN '00000000-0000-0000-0000-000000000010'
+    END AS UUID),
+    CONCAT('Great read! Comment on article ', X)
+FROM SYSTEM_RANGE(1, 150);
+
+-- 8. User follows ------------------------------------------------
+INSERT INTO user_follow (created_at, follower_id, following_id) VALUES
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000003'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000004'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000005'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000007'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000002'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000008'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000003'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000009'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000004'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000002'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000006'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000005'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000010'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000003'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000002'),
+(CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000007');
