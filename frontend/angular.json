@@ -22,7 +22,12 @@
             "assets": [
               "src/favicon.ico",
               {
-                "glob": "*.svg",
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "/assets"
+              },
+              {
+                "glob": "**/*",
                 "input": "realworld/assets/media",
                 "output": "/assets"
               },

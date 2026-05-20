@@ -19,6 +19,7 @@ import { DefaultImagePipe } from '../../../shared/pipes/default-image.pipe';
         </div>
         <div class="card-footer">
           <a class="comment-author" [routerLink]="['/profile', comment.author.username]">
+            <!-- <img [src]="comment.author.image | defaultImage" class="comment-author-img" width="50" height="50" /> -->
             <img [src]="comment.author.image | defaultImage" class="comment-author-img" />
           </a>
           &nbsp;
