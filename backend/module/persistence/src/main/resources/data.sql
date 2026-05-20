@@ -1,7 +1,7 @@
 -- ============================================================
 -- Seed Data: Conduit RealWorld Application
 -- 10 users · 20 tags · 500 articles · 1000 article_tags
--- 200 favorites · 150 comments · 21 follows
+-- 200 favorites · 8500 comments (17 per article) · 21 follows
 -- Password for all users: "Password1"
 -- ============================================================
 
@@ -137,11 +137,11 @@ SELECT CURRENT_TIMESTAMP,
     X
 FROM SYSTEM_RANGE(1, 200);
 
--- 7. Article comments (150 rows, 1 per article 1–150) ------------
+-- 7. Article comments (8500 rows, 17 per article) ---------------
 INSERT INTO article_comment (created_at, article_id, author_id, content)
 SELECT CURRENT_TIMESTAMP,
-    X,
-    CAST(CASE MOD(X - 1, 10)
+    A.X,
+    CAST(CASE MOD(A.X + C.X - 2, 10)
         WHEN 0 THEN '00000000-0000-0000-0000-000000000001'
         WHEN 1 THEN '00000000-0000-0000-0000-000000000002'
         WHEN 2 THEN '00000000-0000-0000-0000-000000000003'
@@ -153,8 +153,9 @@ SELECT CURRENT_TIMESTAMP,
         WHEN 8 THEN '00000000-0000-0000-0000-000000000009'
         WHEN 9 THEN '00000000-0000-0000-0000-000000000010'
     END AS UUID),
-    CONCAT('Great read! Comment on article ', X)
-FROM SYSTEM_RANGE(1, 150);
+    CONCAT('Comment ', C.X, ' on article ', A.X, '. Seed data for performance benchmarking.')
+FROM SYSTEM_RANGE(1, 500) A
+CROSS JOIN SYSTEM_RANGE(1, 17) C;
 
 -- 8. User follows ------------------------------------------------
 INSERT INTO user_follow (created_at, follower_id, following_id) VALUES

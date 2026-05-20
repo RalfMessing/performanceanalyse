@@ -2,6 +2,14 @@
   <div class="article-page">
     <div class="banner">
       <div class="container">
+        <img
+          ngSrc="/assets/article-banner.jpg"
+          priority
+          width="1920"
+          height="1280"
+          alt="Article banner"
+          class="article-banner-img"
+        />
         <h1>{{ article.title }}</h1>
 
         <app-article-meta [article]="article">
