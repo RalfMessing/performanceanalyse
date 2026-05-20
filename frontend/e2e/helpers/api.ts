@@ -18,9 +18,11 @@ export async function registerUserViaAPI(request: APIRequestContext, user: UserC
       },
     },
   });
+
   if (!response.ok()) {
     throw new Error(`Failed to register user: ${response.status()}`);
   }
+
   const data = await response.json();
   return data.user.token;
 }
@@ -34,9 +36,11 @@ export async function loginUserViaAPI(request: APIRequestContext, email: string,
       },
     },
   });
+
   if (!response.ok()) {
     throw new Error(`Failed to login: ${response.status()}`);
   }
+
   const data = await response.json();
   return data.user.token;
 }
@@ -59,29 +63,13 @@ export async function createArticleViaAPI(
       },
     },
   });
+
   if (!response.ok()) {
     throw new Error(`Failed to create article: ${response.status()}`);
   }
+
   const data = await response.json();
   return data.article.slug;
-}
-
-export async function updateUserViaAPI(
-  request: APIRequestContext,
-  token: string,
-  updates: { image?: string; bio?: string; username?: string; email?: string },
-): Promise<void> {
-  const response = await request.put(`${API_BASE}/user`, {
-    headers: {
-      Authorization: `Token ${token}`,
-    },
-    data: {
-      user: updates,
-    },
-  });
-  if (!response.ok()) {
-    throw new Error(`Failed to update user: ${response.status()}`);
-  }
 }
 
 export async function createManyArticles(
@@ -92,6 +80,7 @@ export async function createManyArticles(
 ): Promise<string[]> {
   const slugs: string[] = [];
   const uniqueId = `${Date.now()}${Math.random().toString(36).substring(2, 8)}`;
+
   for (let i = 0; i < count; i++) {
     const slug = await createArticleViaAPI(request, token, {
       title: `Test Article ${uniqueId} Number ${i}`,
@@ -100,8 +89,10 @@ export async function createManyArticles(
       tagList: [tag],
     });
     slugs.push(slug);
+
     // Small pause between articles to avoid rate limits
     await new Promise(resolve => setTimeout(resolve, 100));
   }
+
   return slugs;
 }

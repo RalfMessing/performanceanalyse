@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { User } from '../../core/auth/user.model';
@@ -19,7 +19,6 @@ interface SettingsForm {
   selector: 'app-settings-page',
   templateUrl: './settings.component.html',
   imports: [ListErrorsComponent, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SettingsComponent implements OnInit {
   user!: User;
@@ -33,8 +32,8 @@ export default class SettingsComponent implements OnInit {
       nonNullable: true,
     }),
   });
-  errors = signal<Errors | null>(null);
-  isSubmitting = signal(false);
+  errors: Errors | null = null;
+  isSubmitting = false;
   destroyRef = inject(DestroyRef);
 
   constructor(
@@ -43,14 +42,7 @@ export default class SettingsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const user = this.userService.getCurrentUserSync();
-    if (user) {
-      this.settingsForm.patchValue({
-        ...user,
-        image: user.image ?? '',
-        bio: user.bio ?? '',
-      });
-    }
+    this.settingsForm.patchValue(this.userService.getCurrentUser() as Partial<User>);
   }
 
   logout(): void {
@@ -58,7 +50,7 @@ export default class SettingsComponent implements OnInit {
   }
 
   submitForm() {
-    this.isSubmitting.set(true);
+    this.isSubmitting = true;
 
     this.userService
       .update(this.settingsForm.value)
@@ -66,8 +58,8 @@ export default class SettingsComponent implements OnInit {
       .subscribe({
         next: ({ user }) => void this.router.navigate(['/profile/', user.username]),
         error: err => {
-          this.errors.set(err);
-          this.isSubmitting.set(false);
+          this.errors = err;
+          this.isSubmitting = false;
         },
       });
   }

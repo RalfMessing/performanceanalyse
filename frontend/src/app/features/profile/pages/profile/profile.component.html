@@ -1,25 +1,16 @@
-<div class="profile-page">
-  @if (errors()) {
-    <div class="container">
-      <div class="row">
-        <div class="col-xs-12 col-md-10 offset-md-1">
-          <app-list-errors [errors]="errors()" />
-        </div>
-      </div>
-    </div>
-  }
-  @if (profile(); as p) {
+@if (profile) {
+  <div class="profile-page">
     <div class="user-info">
       <div class="container">
         <div class="row">
           <div class="col-xs-12 col-md-10 offset-md-1">
-            <img [src]="p.image | defaultImage" class="user-img" />
-            <h4>{{ p.username }}</h4>
-            <p>{{ p.bio ?? '' }}</p>
-            @if (!isUser()) {
-              <app-follow-button [profile]="p" (toggle)="onToggleFollowing($event)" />
+            <img [src]="profile.image" class="user-img" />
+            <h4>{{ profile.username }}</h4>
+            <p>{{ profile.bio }}</p>
+            @if (!isUser) {
+              <app-follow-button [profile]="profile" (toggle)="onToggleFollowing($event)" />
             }
-            @if (isUser()) {
+            @if (isUser) {
               <a [routerLink]="['/settings']" class="btn btn-sm btn-outline-secondary action-btn">
                 <i class="ion-gear-a"></i> Edit Profile Settings
               </a>
@@ -39,7 +30,7 @@
                   class="nav-link"
                   routerLinkActive="active"
                   [routerLinkActiveOptions]="{ exact: true }"
-                  [routerLink]="['/profile', p.username]"
+                  [routerLink]="['/profile', profile.username]"
                 >
                   My Posts
                 </a>
@@ -49,7 +40,7 @@
                   class="nav-link"
                   routerLinkActive="active"
                   [routerLinkActiveOptions]="{ exact: true }"
-                  [routerLink]="['/profile', p.username, 'favorites']"
+                  [routerLink]="['/profile', profile.username, 'favorites']"
                 >
                   Favorited Posts
                 </a>
@@ -61,5 +52,5 @@
         </div>
       </div>
     </div>
-  }
-</div>
+  </div>
+}

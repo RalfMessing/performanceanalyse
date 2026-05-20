@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 export interface ArticleData {
   title: string;
@@ -7,14 +7,12 @@ export interface ArticleData {
   tags?: string[];
 }
 
-export async function createArticle(page: Page, article: ArticleData, options: { sleepAfter?: number } = {}) {
-  const { sleepAfter = 1 } = options;
-
+export async function createArticle(page: Page, article: ArticleData) {
   await page.goto('/editor', { waitUntil: 'load' });
 
-  await page.fill('input[name="title"]', article.title);
-  await page.fill('input[name="description"]', article.description);
-  await page.fill('textarea[name="body"]', article.body);
+  await page.fill('input[formControlName="title"]', article.title);
+  await page.fill('input[formControlName="description"]', article.description);
+  await page.fill('textarea[formControlName="body"]', article.body);
 
   if (article.tags && article.tags.length > 0) {
     for (const tag of article.tags) {
@@ -25,31 +23,25 @@ export async function createArticle(page: Page, article: ArticleData, options: {
 
   // Start waiting for navigation before clicking to avoid race condition
   await Promise.all([page.waitForURL(/\/article\/.+/), page.click('button:has-text("Publish Article")')]);
-
-  // Ensure Date.now() advances so the next generateUniqueArticle() gets a distinct timestamp
-  if (sleepAfter > 0) {
-    await new Promise(resolve => setTimeout(resolve, sleepAfter));
-  }
 }
 
 export async function editArticle(page: Page, slug: string, updates: Partial<ArticleData>) {
   await page.goto(`/editor/${slug}`, { waitUntil: 'load' });
 
-  // Wait for the API data to populate the form (not just for the input to exist)
-  const titleInput = page.locator('input[name="title"]');
-  await expect(titleInput).not.toHaveValue('', { timeout: 10000 });
+  // Wait for form to be populated before clearing/filling
+  await page.waitForSelector('input[formControlName="title"]');
 
   if (updates.title) {
-    await page.fill('input[name="title"]', '');
-    await page.fill('input[name="title"]', updates.title);
+    await page.fill('input[formControlName="title"]', '');
+    await page.fill('input[formControlName="title"]', updates.title);
   }
   if (updates.description) {
-    await page.fill('input[name="description"]', '');
-    await page.fill('input[name="description"]', updates.description);
+    await page.fill('input[formControlName="description"]', '');
+    await page.fill('input[formControlName="description"]', updates.description);
   }
   if (updates.body) {
-    await page.fill('textarea[name="body"]', '');
-    await page.fill('textarea[name="body"]', updates.body);
+    await page.fill('textarea[formControlName="body"]', '');
+    await page.fill('textarea[formControlName="body"]', updates.body);
   }
 
   await Promise.all([page.waitForURL(/\/article\/.+/), page.click('button:has-text("Publish Article")')]);

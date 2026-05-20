@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { User } from '../../../../core/auth/user.model';
@@ -7,12 +7,12 @@ import { ArticlesService } from '../../services/articles.service';
 import { CommentsService } from '../../services/comments.service';
 import { UserService } from '../../../../core/auth/services/user.service';
 import { ArticleMetaComponent } from '../../components/article-meta.component';
-import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
 import { ListErrorsComponent } from '../../../../shared/components/list-errors.component';
 import { ArticleCommentComponent } from '../../components/article-comment.component';
 import { catchError } from 'rxjs/operators';
-import { combineLatest, EMPTY } from 'rxjs';
+import { combineLatest, throwError } from 'rxjs';
 import { Comment } from '../../models/comment.model';
 import { IfAuthenticatedDirective } from '../../../../core/auth/if-authenticated.directive';
 import { Errors } from '../../../../core/models/errors.model';
@@ -20,7 +20,6 @@ import { Profile } from '../../../profile/models/profile.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FavoriteButtonComponent } from '../../components/favorite-button.component';
 import { FollowButtonComponent } from '../../../profile/components/follow-button.component';
-import { DefaultImagePipe } from '../../../../shared/pipes/default-image.pipe';
 
 @Component({
   selector: 'app-article-page',
@@ -38,24 +37,19 @@ import { DefaultImagePipe } from '../../../../shared/pipes/default-image.pipe';
     ArticleCommentComponent,
     ReactiveFormsModule,
     IfAuthenticatedDirective,
-    DefaultImagePipe,
-    NgOptimizedImage,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ArticleComponent implements OnInit {
-  article = signal<Article | null>(null);
-  currentUser = signal<User | null>(null);
-  comments = signal<Comment[]>([]);
-  canModify = signal(false);
-  errors = signal<Errors | null>(null);
+  article!: Article;
+  currentUser!: User | null;
+  comments: Comment[] = [];
+  canModify: boolean = false;
 
   commentControl = new FormControl<string>('', { nonNullable: true });
-  commentFormErrors = signal<Errors | null>(null);
-  deleteCommentErrors = signal<Errors | null>(null);
+  commentFormErrors: Errors | null = null;
 
-  isSubmitting = signal(false);
-  isDeleting = signal(false);
+  isSubmitting = false;
+  isDeleting = false;
   destroyRef = inject(DestroyRef);
 
   constructor(
@@ -71,48 +65,38 @@ export default class ArticleComponent implements OnInit {
     combineLatest([this.articleService.get(slug), this.commentsService.getAll(slug), this.userService.currentUser])
       .pipe(
         catchError(err => {
-          this.errors.set(err.errors || { error: ['Failed to load article'] });
-          return EMPTY;
+          void this.router.navigate(['/']);
+          return throwError(() => err);
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(([article, comments, currentUser]) => {
-        this.article.set(article);
-        this.comments.set(comments);
-        this.currentUser.set(currentUser);
-        this.canModify.set(currentUser?.username === article.author.username);
+        this.article = article;
+        this.comments = comments;
+        this.currentUser = currentUser;
+        this.canModify = currentUser?.username === article.author.username;
       });
   }
 
   onToggleFavorite(favorited: boolean): void {
-    this.article.update(article => {
-      if (!article) return article;
-      return {
-        ...article,
-        favorited,
-        favoritesCount: favorited ? article.favoritesCount + 1 : article.favoritesCount - 1,
-      };
-    });
+    this.article.favorited = favorited;
+
+    if (favorited) {
+      this.article.favoritesCount++;
+    } else {
+      this.article.favoritesCount--;
+    }
   }
 
   toggleFollowing(profile: Profile): void {
-    this.article.update(article => {
-      if (!article) return article;
-      return {
-        ...article,
-        author: { ...article.author, following: profile.following },
-      };
-    });
+    this.article.author.following = profile.following;
   }
 
   deleteArticle(): void {
-    const article = this.article();
-    if (!article) return;
-
-    this.isDeleting.set(true);
+    this.isDeleting = true;
 
     this.articleService
-      .delete(article.slug)
+      .delete(this.article.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         void this.router.navigate(['/']);
@@ -120,43 +104,31 @@ export default class ArticleComponent implements OnInit {
   }
 
   addComment() {
-    const article = this.article();
-    if (!article) return;
-
-    this.isSubmitting.set(true);
-    this.commentFormErrors.set(null);
+    this.isSubmitting = true;
+    this.commentFormErrors = null;
 
     this.commentsService
-      .add(article.slug, this.commentControl.value)
+      .add(this.article.slug, this.commentControl.value)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: comment => {
-          this.comments.update(comments => [comment, ...comments]);
+          this.comments.unshift(comment);
           this.commentControl.reset('');
-          this.isSubmitting.set(false);
+          this.isSubmitting = false;
         },
         error: errors => {
-          this.isSubmitting.set(false);
-          this.commentFormErrors.set(errors);
+          this.isSubmitting = false;
+          this.commentFormErrors = errors;
         },
       });
   }
 
   deleteComment(comment: Comment): void {
-    const article = this.article();
-    if (!article) return;
-
-    this.deleteCommentErrors.set(null);
     this.commentsService
-      .delete(comment.id, article.slug)
+      .delete(comment.id, this.article.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.comments.update(comments => comments.filter(item => item !== comment));
-        },
-        error: errors => {
-          this.deleteCommentErrors.set(errors);
-        },
+      .subscribe(() => {
+        this.comments = this.comments.filter(item => item !== comment);
       });
   }
 }

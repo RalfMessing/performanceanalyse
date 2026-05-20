@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  EventEmitter,
-  inject,
-  Input,
-  Output,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, EventEmitter, inject, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
@@ -23,7 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     <button
       class="btn btn-sm action-btn"
       [ngClass]="{
-        disabled: isSubmitting(),
+        disabled: isSubmitting,
         'btn-outline-secondary': !profile.following,
         'btn-secondary': profile.following,
       }"
@@ -35,12 +26,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     </button>
   `,
   imports: [NgClass],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowButtonComponent {
   @Input() profile!: Profile;
   @Output() toggle = new EventEmitter<Profile>();
-  isSubmitting = signal(false);
+  isSubmitting = false;
   destroyRef = inject(DestroyRef);
 
   constructor(
@@ -50,7 +40,7 @@ export class FollowButtonComponent {
   ) {}
 
   toggleFollowing(): void {
-    this.isSubmitting.set(true);
+    this.isSubmitting = true;
 
     this.userService.isAuthenticated
       .pipe(
@@ -70,12 +60,10 @@ export class FollowButtonComponent {
       )
       .subscribe({
         next: profile => {
-          this.isSubmitting.set(false);
+          this.isSubmitting = false;
           this.toggle.emit(profile);
         },
-        error: () => {
-          this.isSubmitting.set(false);
-        },
+        error: () => (this.isSubmitting = false),
       });
   }
 }

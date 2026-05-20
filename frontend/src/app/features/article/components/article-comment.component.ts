@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { UserService } from '../../../core/auth/services/user.service';
 import { User } from '../../../core/auth/user.model';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { Comment } from '../models/comment.model';
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { DefaultImagePipe } from '../../../shared/pipes/default-image.pipe';
 
 @Component({
   selector: 'app-article-comment',
@@ -19,8 +18,7 @@ import { DefaultImagePipe } from '../../../shared/pipes/default-image.pipe';
         </div>
         <div class="card-footer">
           <a class="comment-author" [routerLink]="['/profile', comment.author.username]">
-            <!-- <img [src]="comment.author.image | defaultImage" class="comment-author-img" width="50" height="50" /> -->
-            <img [src]="comment.author.image | defaultImage" class="comment-author-img" />
+            <img [src]="comment.author.image" class="comment-author-img" />
           </a>
           &nbsp;
           <a class="comment-author" [routerLink]="['/profile', comment.author.username]">
@@ -38,8 +36,7 @@ import { DefaultImagePipe } from '../../../shared/pipes/default-image.pipe';
       </div>
     }
   `,
-  imports: [RouterLink, DatePipe, AsyncPipe, DefaultImagePipe],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, DatePipe, AsyncPipe],
 })
 export class ArticleCommentComponent {
   @Input() comment!: Comment;

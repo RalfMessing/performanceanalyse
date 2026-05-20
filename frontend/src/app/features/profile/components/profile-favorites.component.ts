@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ArticleListComponent } from '../../article/components/article-list.component';
 import { ProfileService } from '../services/profile.service';
@@ -8,15 +8,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-profile-favorites',
-  template: `@if (favoritesConfig()) {
-    <app-article-list [limit]="10" [config]="favoritesConfig()!" />
-  }`,
+  template: `<app-article-list [limit]="10" [config]="favoritesConfig" />`,
   imports: [ArticleListComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ProfileFavoritesComponent implements OnInit {
-  profile = signal<Profile | null>(null);
-  favoritesConfig = signal<ArticleListConfig | null>(null);
+  profile!: Profile;
+  favoritesConfig!: ArticleListConfig;
   destroyRef = inject(DestroyRef);
 
   constructor(
@@ -30,13 +27,13 @@ export default class ProfileFavoritesComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (profile: Profile) => {
-          this.profile.set(profile);
-          this.favoritesConfig.set({
+          this.profile = profile;
+          this.favoritesConfig = {
             type: 'all',
             filters: {
-              favorited: profile.username,
+              favorited: this.profile.username,
             },
-          });
+          };
         },
       });
   }

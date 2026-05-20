@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
@@ -18,10 +18,9 @@ interface ArticleForm {
   selector: 'app-editor-page',
   templateUrl: './editor.component.html',
   imports: [ListErrorsComponent, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class EditorComponent implements OnInit {
-  tagList = signal<string[]>([]);
+  tagList: string[] = [];
   articleForm: UntypedFormGroup = new FormGroup<ArticleForm>({
     title: new FormControl('', { nonNullable: true }),
     description: new FormControl('', { nonNullable: true }),
@@ -29,8 +28,8 @@ export default class EditorComponent implements OnInit {
   });
   tagField = new FormControl<string>('', { nonNullable: true });
 
-  errors = signal<Errors | null>(null);
-  isSubmitting = signal(false);
+  errors: Errors | null = null;
+  isSubmitting = false;
   destroyRef = inject(DestroyRef);
 
   constructor(
@@ -46,7 +45,7 @@ export default class EditorComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(([article, { user }]) => {
           if (user.username === article.author.username) {
-            this.tagList.set(article.tagList);
+            this.tagList = article.tagList;
             this.articleForm.patchValue(article);
           } else {
             void this.router.navigate(['/']);
@@ -59,26 +58,26 @@ export default class EditorComponent implements OnInit {
     // retrieve tag control
     const tag = this.tagField.value;
     // only add tag if it does not exist yet
-    if (tag != null && tag.trim() !== '' && this.tagList().indexOf(tag) < 0) {
-      this.tagList.update(tags => [...tags, tag]);
+    if (tag != null && tag.trim() !== '' && this.tagList.indexOf(tag) < 0) {
+      this.tagList.push(tag);
     }
     // clear the input
     this.tagField.reset('');
   }
 
   removeTag(tagName: string): void {
-    this.tagList.update(tags => tags.filter(tag => tag !== tagName));
+    this.tagList = this.tagList.filter(tag => tag !== tagName);
   }
 
   submitForm(): void {
-    this.isSubmitting.set(true);
+    this.isSubmitting = true;
     // update any single tag
     this.addTag();
 
     const slug = this.route.snapshot.params['slug'];
     const articleData = {
       ...this.articleForm.value,
-      tagList: this.tagList(),
+      tagList: this.tagList,
     };
 
     const observable = slug
@@ -88,8 +87,8 @@ export default class EditorComponent implements OnInit {
     observable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: article => this.router.navigate(['/article/', article.slug]),
       error: err => {
-        this.errors.set(err);
-        this.isSubmitting.set(false);
+        this.errors = err;
+        this.isSubmitting = false;
       },
     });
   }

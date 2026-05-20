@@ -4,18 +4,12 @@
       <div class="col-md-6 offset-md-3 col-xs-12">
         <h1 class="text-xs-center">Your Settings</h1>
 
-        <app-list-errors [errors]="errors()" />
+        <app-list-errors [errors]="errors" />
 
         <form [formGroup]="settingsForm" (ngSubmit)="submitForm()">
-          <fieldset [disabled]="isSubmitting()">
+          <fieldset [disabled]="isSubmitting">
             <fieldset class="form-group">
-              <input
-                class="form-control"
-                type="text"
-                placeholder="URL of profile picture"
-                formControlName="image"
-                name="image"
-              />
+              <input class="form-control" type="text" placeholder="URL of profile picture" formControlName="image" />
             </fieldset>
 
             <fieldset class="form-group">
@@ -24,7 +18,6 @@
                 type="text"
                 placeholder="Username"
                 formControlName="username"
-                name="username"
               />
             </fieldset>
 
@@ -34,19 +27,12 @@
                 rows="8"
                 placeholder="Short bio about you"
                 formControlName="bio"
-                name="bio"
               >
               </textarea>
             </fieldset>
 
             <fieldset class="form-group">
-              <input
-                class="form-control form-control-lg"
-                type="email"
-                placeholder="Email"
-                formControlName="email"
-                name="email"
-              />
+              <input class="form-control form-control-lg" type="email" placeholder="Email" formControlName="email" />
             </fieldset>
 
             <fieldset class="form-group">
@@ -55,7 +41,6 @@
                 type="password"
                 placeholder="New Password"
                 formControlName="password"
-                name="password"
               />
             </fieldset>
 

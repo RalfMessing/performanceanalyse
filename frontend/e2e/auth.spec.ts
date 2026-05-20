@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 import { register, login, logout, generateUniqueUser } from './helpers/auth';
-import { getToken, getAuthState } from './helpers/debug';
 
 test.describe('Authentication', () => {
   test('should register a new user', async ({ page }) => {
@@ -31,8 +30,8 @@ test.describe('Authentication', () => {
 
   test('should show error for invalid login', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('input[name="email"]', 'nonexistent@example.com');
-    await page.fill('input[name="password"]', 'wrongpassword');
+    await page.fill('input[formControlName="email"]', 'nonexistent@example.com');
+    await page.fill('input[formControlName="password"]', 'wrongpassword');
     await page.click('button[type="submit"]');
     // Should show error message
     await expect(page.locator('.error-messages')).toBeVisible();
@@ -46,8 +45,8 @@ test.describe('Authentication', () => {
     await logout(page);
     // Try to login with correct email but wrong password
     await page.goto('/login');
-    await page.fill('input[name="email"]', user.email);
-    await page.fill('input[name="password"]', 'wrongpassword123');
+    await page.fill('input[formControlName="email"]', user.email);
+    await page.fill('input[formControlName="password"]', 'wrongpassword123');
     await page.click('button[type="submit"]');
     // Should show error message
     await expect(page.locator('.error-messages')).toBeVisible();
@@ -81,23 +80,5 @@ test.describe('Authentication', () => {
     await page.reload();
     // Should still be logged in
     await expect(page.locator(`a[href="/profile/${user.username}"]`)).toBeVisible();
-  });
-
-  test('should handle invalid token on page reload gracefully', async ({ page }) => {
-    // Set an invalid token in localStorage before navigating
-    await page.goto('/');
-    await page.evaluate(() => {
-      localStorage.setItem('jwtToken', 'invalid-token-that-will-cause-401');
-    });
-    // Reload the page - this should NOT cause a blank screen
-    await page.reload();
-    // The app should still load and show the unauthenticated UI
-    await expect(page.locator('a[href="/login"]')).toBeVisible();
-    await expect(page.locator('a[href="/register"]')).toBeVisible();
-    // The invalid token should be cleared (use debug interface)
-    const token = await getToken(page);
-    expect(token).toBeNull();
-    const authState = await getAuthState(page);
-    expect(authState).toBe('unauthenticated');
   });
 });

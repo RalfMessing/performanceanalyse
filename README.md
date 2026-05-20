@@ -12,15 +12,16 @@ Das Ziel ist es, gezielt verbreitete **Anti-Patterns** einzuführen, deren Auswi
 
 ```
 conduit/
-├── frontend/   # Angular 21 – SPA-Frontend
+├── frontend/   # Angular 20 – SPA-Frontend
 └── backend/    # Spring Boot 3 + Java 21 – REST-API
 ```
 
 ### Frontend
 
 Basiert auf [angular-realworld-example-app](https://github.com/realworld-apps/angular-realworld-example-app) (MIT-Lizenz).
+Pre-Angular 21 Upgrade Commit 766c1a7c9f9f2cbd993c1aa56b9fb66482dc2104 
 
-- Angular 21 mit Standalone Components und zoneless Change Detection
+- Angular 20 mit Zone.js
 - JWT-Authentifizierung über localStorage
 - Lazy-loaded Routes
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ListErrorsComponent } from '../../shared/components/list-errors.component';
@@ -16,13 +16,12 @@ interface AuthForm {
   selector: 'app-auth-page',
   templateUrl: './auth.component.html',
   imports: [RouterLink, ListErrorsComponent, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AuthComponent implements OnInit {
   authType = '';
   title = '';
-  errors = signal<Errors>({ errors: {} });
-  isSubmitting = signal(false);
+  errors: Errors = { errors: {} };
+  isSubmitting = false;
   authForm: FormGroup<AuthForm>;
   destroyRef = inject(DestroyRef);
 
@@ -58,8 +57,8 @@ export default class AuthComponent implements OnInit {
   }
 
   submitForm(): void {
-    this.isSubmitting.set(true);
-    this.errors.set({ errors: {} });
+    this.isSubmitting = true;
+    this.errors = { errors: {} };
 
     let observable =
       this.authType === 'login'
@@ -75,8 +74,8 @@ export default class AuthComponent implements OnInit {
     observable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => void this.router.navigate(['/']),
       error: err => {
-        this.errors.set(err);
-        this.isSubmitting.set(false);
+        this.errors = err;
+        this.isSubmitting = false;
       },
     });
   }
