@@ -20,6 +20,7 @@ import { Profile } from '../../../profile/models/profile.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FavoriteButtonComponent } from '../../components/favorite-button.component';
 import { FollowButtonComponent } from '../../../profile/components/follow-button.component';
+import { ReadingTimePipe } from '../../../../shared/pipes/reading-time.pipe';
 
 @Component({
   selector: 'app-article-page',
@@ -39,6 +40,7 @@ import { FollowButtonComponent } from '../../../profile/components/follow-button
     ReactiveFormsModule,
     IfAuthenticatedDirective,
     NgOptimizedImage,
+    ReadingTimePipe
   ],
 })
 export default class ArticleComponent implements OnInit {

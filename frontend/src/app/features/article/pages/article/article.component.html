@@ -11,6 +11,7 @@
           class="article-banner-img"
         />
         <h1>{{ article.title }}</h1>
+        <p class="reading-time">{{ article.body | readingTime }} min read</p>
 
         <app-article-meta [article]="article">
           @if (canModify) {
