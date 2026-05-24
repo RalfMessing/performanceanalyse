@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { User } from '../../../../core/auth/user.model';
@@ -24,6 +24,7 @@ import { FollowButtonComponent } from '../../../profile/components/follow-button
 @Component({
   selector: 'app-article-page',
   templateUrl: './article.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ArticleMetaComponent,
     RouterLink,
@@ -59,6 +60,7 @@ export default class ArticleComponent implements OnInit {
     private readonly commentsService: CommentsService,
     private readonly router: Router,
     private readonly userService: UserService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -76,21 +78,26 @@ export default class ArticleComponent implements OnInit {
         this.comments = comments;
         this.currentUser = currentUser;
         this.canModify = currentUser?.username === article.author.username;
+        this.cdr.markForCheck();
       });
   }
 
   onToggleFavorite(favorited: boolean): void {
-    this.article.favorited = favorited;
-
-    if (favorited) {
-      this.article.favoritesCount++;
-    } else {
-      this.article.favoritesCount--;
-    }
+    this.article = {
+      ...this.article,
+      favorited,
+      favoritesCount: this.article.favoritesCount + (favorited ? 1 : -1),
+    };
   }
 
   toggleFollowing(profile: Profile): void {
-    this.article.author.following = profile.following;
+    this.article = {
+      ...this.article,
+      author: {
+        ...this.article.author,
+        following: profile.following,
+      },
+    };
   }
 
   deleteArticle(): void {
@@ -113,13 +120,15 @@ export default class ArticleComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: comment => {
-          this.comments.unshift(comment);
+          this.comments = [comment, ...this.comments];
           this.commentControl.reset('');
           this.isSubmitting = false;
+          this.cdr.markForCheck();
         },
         error: errors => {
           this.isSubmitting = false;
           this.commentFormErrors = errors;
+          this.cdr.markForCheck();
         },
       });
   }
@@ -130,6 +139,7 @@ export default class ArticleComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.comments = this.comments.filter(item => item !== comment);
+        this.cdr.markForCheck();
       });
   }
 }

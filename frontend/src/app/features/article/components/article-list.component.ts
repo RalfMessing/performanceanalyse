@@ -1,4 +1,15 @@
-import { Component, DestroyRef, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { ArticlesService } from '../services/articles.service';
 import { ArticleListConfig } from '../models/article-list-config.model';
 import { Article } from '../models/article.model';
@@ -42,6 +53,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
       </nav>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ArticlePreviewComponent, NgClass, RouterLink],
   styles: `
     .page-link {
@@ -86,7 +98,10 @@ export class ArticleListComponent implements OnChanges {
     }
   }
 
-  constructor(private articlesService: ArticlesService) {}
+  constructor(
+    private articlesService: ArticlesService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   setPageTo(pageNumber: number) {
     if (pageNumber !== this.page) {
@@ -112,9 +127,9 @@ export class ArticleListComponent implements OnChanges {
       .subscribe(data => {
         this.loading = LoadingState.LOADED;
         this.results = data.articles;
-
         // Used from http://www.jstips.co/en/create-range-0...n-easily-using-one-line/
         this.totalPages = Array.from(new Array(Math.ceil(data.articlesCount / this.limit)), (val, index) => index + 1);
+        this.cdr.markForCheck();
       });
   }
 }
