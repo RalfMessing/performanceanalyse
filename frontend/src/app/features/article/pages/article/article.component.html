@@ -113,9 +113,12 @@
             <a [routerLink]="['/login']">Sign in</a> or <a [routerLink]="['/register']">sign up</a> to add comments on
             this article.
           </div>
-
-          @for (comment of comments; track comment) {
-            <app-article-comment [comment]="comment" (delete)="deleteComment(comment)" />
+          @defer (on viewport) {
+            @for (comment of comments; track comment) {
+              <app-article-comment [comment]="comment" (delete)="deleteComment(comment)" />
+            }
+          } @placeholder {
+            <div class="comments-placeholder">Comments will be loaded when in viewport...</div>
           }
         </div>
       </div>
