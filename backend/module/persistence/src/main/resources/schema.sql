@@ -7,7 +7,7 @@ create table if not exists article
     description varchar(50)   not null,
     slug        varchar(50)   not null unique,
     title       varchar(50)   not null unique,
-    content     varchar(1000) not null,
+    content     clob          not null,
     primary key (id)
 );
 
