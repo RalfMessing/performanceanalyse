@@ -12,7 +12,7 @@
         <h1>{{ article.title }}</h1>
         <p class="reading-time">{{ calculateReadingTime(article.body) }} min read</p>
 
-        <app-article-meta [article]="article">
+        <app-article-meta [slug]="article.slug">
           @if (canModify) {
             <span>
               <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/editor', article.slug]">
@@ -59,7 +59,7 @@
       <hr />
 
       <div class="article-actions">
-        <app-article-meta [article]="article">
+        <app-article-meta [slug]="article.slug">
           @if (canModify) {
             <span>
               <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/editor', article.slug]">
