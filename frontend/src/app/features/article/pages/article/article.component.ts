@@ -20,7 +20,6 @@ import { Profile } from '../../../profile/models/profile.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FavoriteButtonComponent } from '../../components/favorite-button.component';
 import { FollowButtonComponent } from '../../../profile/components/follow-button.component';
-import { ReadingTimePipe } from '../../../../shared/pipes/reading-time.pipe';
 
 @Component({
   selector: 'app-article-page',
@@ -38,7 +37,6 @@ import { ReadingTimePipe } from '../../../../shared/pipes/reading-time.pipe';
     ArticleCommentComponent,
     ReactiveFormsModule,
     IfAuthenticatedDirective,
-    ReadingTimePipe
   ],
 })
 export default class ArticleComponent implements OnInit {
@@ -141,5 +139,15 @@ export default class ArticleComponent implements OnInit {
         this.comments = this.comments.filter(item => item !== comment);
         this.cdr.markForCheck();
       });
+  }
+
+  calculateReadingTime(body: string): number {
+    if (!body) return 0;
+    const text = body
+      .replace(/[#*_~`>]/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/!\[[^\]]*\]\([^)]+\)/g, '');
+    const words = text.split(/\s+/).filter(w => w.length > 0).length;
+    return Math.ceil(words / 200);
   }
 }

@@ -10,7 +10,7 @@
           class="article-banner-img"
         />
         <h1>{{ article.title }}</h1>
-        <p class="reading-time">{{ article.body | readingTime }} min read</p>
+        <p class="reading-time">{{ calculateReadingTime(article.body) }} min read</p>
 
         <app-article-meta [article]="article">
           @if (canModify) {
