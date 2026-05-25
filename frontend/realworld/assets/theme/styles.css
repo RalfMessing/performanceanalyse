@@ -1450,8 +1450,6 @@ footer > .container {
 .article-page .card .comment-author-img {
   display: inline-block;
   vertical-align: middle;
-  height: 20px;
-  width: 20px;
   border-radius: 30px;
 }
 
