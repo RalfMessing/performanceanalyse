@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { User } from '../../../../core/auth/user.model';
@@ -25,7 +25,6 @@ import { ReadingTimePipe } from '../../../../shared/pipes/reading-time.pipe';
 @Component({
   selector: 'app-article-page',
   templateUrl: './article.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ArticleMetaComponent,
     RouterLink,
