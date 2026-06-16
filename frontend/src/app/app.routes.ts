@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { inject } from '@angular/core';
 import { UserService } from './core/auth/services/user.service';
 import { map } from 'rxjs/operators';
-import ArticleComponent from './features/article/pages/article/article.component';
 
 export const routes: Routes = [
   {
@@ -49,6 +48,6 @@ export const routes: Routes = [
   },
   {
     path: 'article/:slug',
-    component: ArticleComponent,
+    loadComponent: () => import('./features/article/pages/article/article.component'),
   },
 ];
