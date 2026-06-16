@@ -9,6 +9,7 @@ import { UserService } from '../../../../core/auth/services/user.service';
 import { ArticleMetaComponent } from '../../components/article-meta.component';
 import { AsyncPipe, NgClass } from '@angular/common';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
+import { ReadingTimePipe } from '../../../../shared/pipes/reading-time.pipe';
 import { ListErrorsComponent } from '../../../../shared/components/list-errors.component';
 import { ArticleCommentComponent } from '../../components/article-comment.component';
 import { catchError } from 'rxjs/operators';
@@ -31,6 +32,7 @@ import { FollowButtonComponent } from '../../../profile/components/follow-button
     FollowButtonComponent,
     FavoriteButtonComponent,
     MarkdownPipe,
+    ReadingTimePipe,
     AsyncPipe,
     ListErrorsComponent,
     FormsModule,
@@ -139,15 +141,5 @@ export default class ArticleComponent implements OnInit {
         this.comments = this.comments.filter(item => item !== comment);
         this.cdr.markForCheck();
       });
-  }
-
-  calculateReadingTime(body: string): number {
-    if (!body) return 0;
-    const text = body
-      .replace(/[#*_~`>]/g, '')
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      .replace(/!\[[^\]]*\]\([^)]+\)/g, '');
-    const words = text.split(/\s+/).filter(w => w.length > 0).length;
-    return Math.ceil(words / 200);
   }
 }
